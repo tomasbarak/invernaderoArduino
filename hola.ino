@@ -1,11 +1,12 @@
 #include <Adafruit_Sensor.h>
 #include <Servo.h>
-#include <LiquidCrystal.h>
 #include <DHT.h>
 
-#define ventiluz 3
+#define RGB_green 9
+#define RGB_red 10
+#define RGB_blue 11
+#define ventiluz 6
 #define ventilador 10
-#define botonesDisplay A0
 #define sensorHumedadTierra A0
 #define bomba 11
 #define calefaccion 12
@@ -16,6 +17,9 @@ DHT dht(sensorTemp, DHT11);
 Servo motorVentiluz;
 
 void setup() {
+  pinMode(9, OUTPUT);
+  pinMode(10, OUTPUT);
+  pinMode(11, OUTPUT);
   pinMode(12, OUTPUT);
   motorVentiluz.attach(ventiluz);
   Serial.begin(9600);
@@ -25,12 +29,8 @@ void setup() {
 
 void loop(){
   // put your main code here, to run repeatedly:
-  int displayButtonPressed;
   int humedadTierra = analogRead(sensorHumedadTierra);
-
-  int seccionDePrograma;
-  // 0 = No mostrar nada
-  // 1 = Mostrar Humedad y temperatura ambiente
+  
   // Leemos la humedad relativa
   float humedadAmbiente = dht.readHumidity();
   // Leemos la temperatura en grados centígrados (por defecto)
@@ -46,16 +46,27 @@ void loop(){
   Serial.println("Luz: " + String(luz) + "%");
   
   Serial.println(temperatura);
-  if(seccionDePrograma != 0){
-    delay(1000);
-  }
 
-  if(temperatura > 23.50){
+  if(temperatura > 24.00){
+    motorVentiluz.write(90);
+  }else motorVentiluz.write(0);
+  
+  if(temperatura > 26.00){
       digitalWrite(12, LOW);   
       Serial.println("Temp Alta");
   }else{
       Serial.println("Temp Baja");
       digitalWrite(12, HIGH);  
+  }
+
+  if(luz < 17.00){
+    digitalWrite(RGB_green, LOW);
+    digitalWrite(RGB_blue, LOW);
+    digitalWrite(RGB_red, LOW);
+  }else{
+    digitalWrite(RGB_green, HIGH);
+    digitalWrite(RGB_blue, HIGH);
+    digitalWrite(RGB_red, HIGH);
   }
   delay(1000);
 }
